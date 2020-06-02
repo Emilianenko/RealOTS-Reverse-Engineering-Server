@@ -142,7 +142,6 @@ void Connection::parsePacket(const boost::system::error_code& error)
 	}
 
 	pending_data++;
-	g_game.callGame();
 }
 
 void Connection::parseData()

@@ -16,6 +16,11 @@
 #include "vocation.h"
 #include "itempool.h"
 
+uint64_t getSystemMilliseconds()
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 bool CreatureEntryComparator::operator()(const CreatureEntry& l, const CreatureEntry& r) const
 {
 	return l.interval > r.interval;
@@ -32,19 +37,18 @@ Game::~Game()
 
 void Game::launchGame()
 {
-	std::unique_lock<std::mutex> game_lock_unique(game_mutex, std::defer_lock);
-
+	using clock = std::chrono::steady_clock;
 	game_state = GAME_RUNNING;
 
 	fmt::print(">> Game-server is running (Pid={0})\n", std::this_thread::get_id());
 
-	int64_t interval = serverMilliseconds();
+	currentBeatMiliseconds = getSystemMilliseconds();
 	while (game_state >= GAME_RUNNING) {
-		game_lock_unique.lock();
-		game_signal.wait_for(game_lock_unique, std::chrono::milliseconds(g_config.Beat));
+		clock::time_point next_time_point = clock::now() + std::chrono::milliseconds(g_config.Beat);
 
-		const int64_t delay = serverMilliseconds() - interval;
-		interval = serverMilliseconds();
+		const int64_t systemMillisecondsNow = getSystemMilliseconds();
+		const int64_t delay = systemMillisecondsNow - serverMilliseconds();
+		currentBeatMiliseconds = systemMillisecondsNow;
 
 		// read data from connections
 		receiveData();
@@ -54,7 +58,8 @@ void Game::launchGame()
 
 		// send all data
 		sendData();
-		game_lock_unique.unlock();
+
+		std::this_thread::sleep_until(next_time_point);
 	}
 }
 
@@ -62,12 +67,6 @@ void Game::shutdown()
 {
 	game_state = GAME_OFFLINE;
 	releaseObjects();
-}
-
-void Game::callGame()
-{
-	std::lock_guard<std::mutex> lock_class(game_mutex);
-	game_signal.notify_all();
 }
 
 void Game::setGameState(GameState_t new_state)
@@ -443,7 +442,7 @@ void Game::closeContainers(Item* item, bool force)
 
 uint64_t Game::serverMilliseconds() const
 {
-	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	return currentBeatMiliseconds;
 }
 
 void Game::addConnection(Connection_ptr connection)

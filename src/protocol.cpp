@@ -825,7 +825,7 @@ void Protocol::sendInitGame(Connection_ptr connection)
 	NetworkMessage msg;
 	msg.writeByte(0x0A);
 	msg.writeQuad(player->getId());
-	msg.writeWord(0x32);
+	msg.writeWord(g_config.Beat);
 	msg.writeByte(0x01); // Can report bugs?
 	addMapDescription(connection, msg, player->getPosition());
 	connection->send(msg);

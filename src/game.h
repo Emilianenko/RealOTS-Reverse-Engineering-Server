@@ -116,7 +116,6 @@ public:
 
 	void launchGame();
 	void shutdown();
-	void callGame();
 
 	void setGameState(GameState_t new_state);
 	GameState_t getGameState() const {
@@ -318,8 +317,6 @@ private:
 	std::vector<Connection_ptr> connections{};
 
 	std::recursive_mutex connection_mutex;
-	std::mutex game_mutex;
-	std::condition_variable game_signal;
 
 	Position newbie_start_pos;
 
@@ -334,6 +331,8 @@ private:
 	int32_t skill_time_counter = 0;
 	int32_t creature_time_counter = 0;
 	int32_t round_number = 0;
+
+	uint64_t currentBeatMiliseconds = 0;
 
 	friend class Protocol;
 	friend class Config;

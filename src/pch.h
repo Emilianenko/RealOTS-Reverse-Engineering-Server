@@ -17,6 +17,8 @@
 #pragma warning(disable:4267) // 'var' : conversion from 'uint32_t' to 'Type', possible loss of data
 #pragma warning(disable:4351) // new behavior: elements of array will be default initialized
 #pragma warning(disable:4458) // declaration hides class member
+#define _CRT_SECURE_NO_WARNINGS 1 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #endif
 
 #define strcasecmp _stricmp

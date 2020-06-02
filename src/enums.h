@@ -1,6 +1,6 @@
 #pragma once
 
-enum FieldType_t : uint8_t
+enum FieldType_t : uint16_t
 {
 	FIELD_NONE = 0,
 	FIELD_FIRE = 1,
@@ -183,7 +183,8 @@ enum MessageType_t : uint8_t
 	MESSAGE_STATUS_CONSOLE_RED = 0X19,
 };
 
-enum TalkType_t : uint8_t {
+enum TalkType_t : uint16_t
+{
 	TALKTYPE_SAY = 1,
 	TALKTYPE_WHISPER = 2,
 	TALKTYPE_YELL = 3,
